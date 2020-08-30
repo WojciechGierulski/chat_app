@@ -7,7 +7,9 @@ class InfoSender:
     @staticmethod
     def message_transform(text, client):
         now = datetime.now()
-        return [now.strftime("%d/%m/%Y %H:%M:%S"), client.name, text]
+        hour = now.hour if now.hour >= 10 else "0" + str(now.hour)
+        minute = now.minute if now.minute >= 10 else "0" + str(now.minute)
+        return [f"{hour}:{minute}", client.name, text]
 
     @staticmethod
     def disconnect(client):
