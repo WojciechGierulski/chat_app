@@ -60,7 +60,7 @@ class Server:
     def exit_thread(self):
         runn = True
         while runn:
-            x = input("type exit to stop server")
+            x = input("type exit to stop server\n")
             if x == "exit":
                 runn = False
                 self.run = False
@@ -144,10 +144,10 @@ class Server:
     #######################################  COMMANDS BELOW  #############################################
 
     def disconnect_client(self, conn, msg):
-        self.leave_chat_room(conn)
+        self.leave_chat_room(conn, msg)
         del self.users[conn]
 
-    def leave_chat_room(self, conn):
+    def leave_chat_room(self, conn, msg):
         name = self.users[conn].name
         room = self.find_room_by_user_name(name)
         if room is not None:
