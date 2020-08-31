@@ -1,5 +1,4 @@
 import socket
-import atexit
 
 class Client:
     PORT = 5060
@@ -10,13 +9,9 @@ class Client:
     DISCONNECT_MSG = "!DISCONNECT!"
 
     def __init__(self):
-        atexit.register(self.exit_handler)
         self.name = ""
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connected = False
-
-    def exit_handler(self):
-        self.send_msg(self.DISCONNECT_MSG)
 
     def connect(self):
         try:

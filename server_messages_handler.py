@@ -31,7 +31,8 @@ class Handler:
             if self.client.connected:
                 msg = self.client.rec_msg()
                 if msg:
-                    self.commands[msg]()
+                    msg = json.loads(msg)
+                    self.commands[msg["command"]](msg)
 
     def load_commands(self):
         self.commands["new_message"] = self.new_message
@@ -44,44 +45,44 @@ class Handler:
         self.commands["name_ok"] = self.name_ok
         self.commands["join_ok"] = self.join_ok
 
-    def new_message(self):
-        msg = json.loads(self.client.rec_msg())
+    def new_message(self, msg):
+        message = msg['msg']
         chat = self.interface.pages["chat_room"].chat_window_widget
-        chat.add_message(msg)
+        chat.add_message(message)
 
-    def server_crashed(self):
+    def server_crashed(self, msg):
         messagebox.showerror("Server crashed", "Server crashed")
         self.interface.raise_page(self.interface.pages["enter_name"])
         self.client.connected = False
 
-    def host_disconnected(self):
+    def host_disconnected(self, msg):
         tkinter.messagebox.showinfo(title="Host disconnected", message="Host disconnected!")
         self.interface.raise_page(self.interface.pages["start"])
 
-    def servers_list(self):
-        list = Handler.servers_list_convert(json.loads(self.client.rec_msg()))
+    def servers_list(self, msg):
+        list = Handler.servers_list_convert(msg["rooms"])
         self.interface.update_servers_list(list)
 
-    def previous_messages(self):
-        msgs = json.loads(self.client.rec_msg())
+    def previous_messages(self, msg):
+        msgs = msg["messages"]
         for msg in msgs:
             self.interface.pages["chat_room"].chat_window_widget.add_message(msg)
 
-    def messagebox(self):
-        msg = self.client.rec_msg()
+    def messagebox(self, msg):
+        msg = msg["text"]
         messagebox.showinfo("Information", msg)
         for entry in self.interface.pages["create"].entries:
             entry.delete(0, tkinter.END)
         self.interface.pages["enter_name"].entries[0].delete(0, tkinter.END)
 
-    def server_ok(self):
+    def server_ok(self, msg):
         self.interface.load_chat_room()
         for entry in self.interface.pages["create"].entries:
             entry.delete(0, tkinter.END)
 
-    def name_ok(self):
+    def name_ok(self, msg):
         self.interface.client.name = self.interface.pages["enter_name"].entries[0].get()
         self.interface.raise_page(self.interface.pages["start"])
 
-    def join_ok(self):
+    def join_ok(self, msg):
         self.interface.load_chat_room()

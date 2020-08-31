@@ -1,7 +1,6 @@
 import tkinter
 from tkinter import messagebox, simpledialog
 from client import Client
-from data_checkers import *
 from info_sender import InfoSender
 from widgets_creator import WidgetsCreator
 from server_messages_handler import Handler
@@ -48,13 +47,13 @@ class Interface:
         self.root.mainloop()
 
     def exit_button(self):
-        self.client.connected = False
-        self.handler.run = False
         try:
             InfoSender.disconnect(self.client)
         except Exception:
             pass
         finally:
+            self.client.connected = False
+            self.handler.run = False
             self.root.destroy()
 
     def create_widgets(self):
