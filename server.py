@@ -8,7 +8,6 @@ from data_checkers import *
 
 
 
-
 class User:
     def __init__(self, thread):
         self.thread = thread
