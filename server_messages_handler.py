@@ -23,16 +23,25 @@ class Handler:
         self.client = self.interface.client
         self.commands = {}
         self.load_commands()
+        self.thread = None
+        self.start()
+
+    def start(self):
+        self.run = True
         self.thread = threading.Thread(target=self.start_handling)
         self.thread.start()
 
     def start_handling(self):
         while self.run:
             if self.client.connected:
-                msg = self.client.rec_msg()
-                if msg:
-                    msg = json.loads(msg)
-                    self.commands[msg["command"]](msg)
+                try:
+                    msg = self.client.rec_msg()
+                    if msg:
+                        msg = json.loads(msg)
+                        self.commands[msg["command"]](msg)
+                except:
+                    self.interface.connection_error_handler()
+                    messagebox.showerror("Connection Error", "Failed to receive data from server")
 
     def load_commands(self):
         self.commands["new_message"] = self.new_message

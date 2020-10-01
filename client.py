@@ -10,14 +10,15 @@ class Client:
 
     def __init__(self):
         self.name = ""
-        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.client = None
         self.connected = False
 
     def connect(self):
         try:
+            self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.client.connect(self.ADDR)
             self.connected = True
-        except Exception:
+        except ValueError:
             pass
 
     def send_msg(self, message):

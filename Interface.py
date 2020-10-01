@@ -64,31 +64,33 @@ class Interface:
         name = self.pages["create"].entries[0].get()
         password = self.pages["create"].entries[1].get()
         capacity = self.pages["create"].entries[2].get()
-        InfoSender.create_server(self.client, [name, password, capacity])
+        InfoSender.create_server(self.client, [name, password, capacity], self.connection_error_handler)
 
     def enter_name_ok_button(self, event=None):
         self.client.connect()
         if not self.client.connected:
-            tkinter.messagebox.showerror(title="Error", message="Could not connect to the server")
+            tkinter.messagebox.showerror("Error", "Could not connect to the server")
         else:
             name = self.pages["enter_name"].entries[0].get()
             if name:
-                InfoSender.set_name(self.client, name)
+                if not self.handler.run:
+                    self.handler.start()
+                InfoSender.set_name(self.client, name, self.connection_error_handler)
 
     def send_button(self, event=None):
         if self.raised_page == self.pages["chat_room"]:
             text = copy.copy(self.pages["chat_room"].entries[0].get())
             if text != "":
-                InfoSender.send_chat_mes(self.client, text)
+                InfoSender.send_chat_mes(self.client, text, self.connection_error_handler)
                 self.pages["chat_room"].entries[0].delete(0, 'end')
 
     def disconnect_button(self):
-        InfoSender.leave_chat_room(self.client)
+        InfoSender.leave_chat_room(self.client, self.connection_error_handler)
         self.raise_page(self.pages["start"])
 
     def load_choose_server_page(self):
         self.raise_page(self.pages["choose_server"])
-        InfoSender.request_servers(self.client)
+        InfoSender.request_servers(self.client, self.connection_error_handler)
 
     def update_servers_list(self, servers_list):
         self.pages["choose_server"].listboxes[0].delete(0, tkinter.END)
@@ -100,10 +102,10 @@ class Interface:
         name = server_string.partition("|")[2].partition("|")[0].strip()
         protected = server_string.partition("|  Protected: ")[2]
         if protected[0:2] == "No":
-            InfoSender.join_server(self.client, name)
+            InfoSender.join_server(self.client, name, "", self.connection_error_handler)
         elif protected[0:2] == "Ye":
             password = simpledialog.askstring(title="Server is protected", prompt="Enter password: ")
-            InfoSender.join_server(self.client, name, password)
+            InfoSender.join_server(self.client, name, password, self.connection_error_handler)
 
     def load_chat_room(self):
         self.pages["chat_room"].chat_window_widget.reset()
@@ -111,11 +113,14 @@ class Interface:
         self.load_previous_chat_messages()
 
     def load_previous_chat_messages(self):
-        InfoSender.request_previous_messages(self.client)
+        InfoSender.request_previous_messages(self.client, self.connection_error_handler)
 
-    def update_chat_messages(self):
-        pass
-
+    def connection_error_handler(self):
+        self.client.connected = False
+        self.handler.run = False
+        self.raise_page(self.pages["enter_name"])
+        self.client.name = None
+        self.client.client.close()
 
 client1 = Client()
 interface1 = Interface(client1)
